@@ -14,7 +14,8 @@ SRC := \
 	src/script_parse_ctx.c \
 	src/embed.c \
 	src/search.c \
-	src/glyph.c
+	src/glyph.c \
+	src/accents.c
 
 SRC_TEST := \
 	test/make_strtab.c \

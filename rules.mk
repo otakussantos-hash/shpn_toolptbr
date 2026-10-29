@@ -64,4 +64,5 @@ build/$(1).rom: agb build/$(1).tag build/Cybil.$(1).rom $(AGB_BINS=%:build/%)
 	$(VERBOSE) $(ENV) dd if=agb/$(bin) of=build/$(1).rom conv=notrunc bs=1 seek=$(offs)
 	)
 	$(VERBOSE) $(ENV) dd if=build/$(1).tag of=build/$(1).rom conv=notrunc bs=1 seek=$(BUILD_TAG_OFFS)
+	$(if $(filter PT-BR,$(1)),$(VERBOSE) $(ENV) python3 tools/accents_font.py build/$(1).rom build/$(1).rom.tmp && mv build/$(1).rom.tmp build/$(1).rom)
 endef
