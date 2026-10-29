@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include "glyph_margins.h"
+#include "accents_tbl.h"
 
 #ifdef FREESTANDING
 bool isdigit(char c);
@@ -52,6 +53,13 @@ struct glyph_margins glyph_margin(uint16_t c, bool in_quotes) {
     if (/* А */ 0x8440 <= c && c <= 0x8460 /* Я */)
         return margins_cyr_cap[c - 0x8440];
 
+    /* Letras acentuadas (PT-BR): mesmas margens da letra base */
+    if (c >= 0x839F && c <= 0x83D6) {
+        for (unsigned i = 0; i < sizeof(accent_glyphs) / sizeof(*accent_glyphs); i++)
+            if (accent_glyphs[i].sjis == c)
+                return glyph_margin(accent_glyphs[i].base, in_quotes);
+    }
+
     if (c == '"')
         c = in_quotes ? 0x8168 : 0x8167;
 
@@ -74,9 +82,6 @@ struct glyph_margins glyph_margin(uint16_t c, bool in_quotes) {
         case ';': return (struct glyph_margins){4, 8};
         case ':': return (struct glyph_margins){4, 8};
         case '\'': return (struct glyph_margins){0, 12};
-        case '[': return (struct glyph_margins){6, 4};
-        case ']': return (struct glyph_margins){1, 9};
-        case '*': return (struct glyph_margins){2, 5};
     }
 
     return (struct glyph_margins){0, 0};
@@ -103,9 +108,6 @@ uint16_t glyph_hw_to_fw(char c, bool in_quotes) {
         case ';': return 0x8147;
         case ':': return 0x8146;
         case '\'': return 0x8166;
-        case '[': return 0x816d;
-        case ']': return 0x816e;
-        case '*': return 0x8196;
     }
     return c;
 }
