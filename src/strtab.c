@@ -9,6 +9,7 @@
 
 #ifdef HAS_ICONV
 #include <iconv.h>
+#include "accents.h"
 #endif
 
 #include "defs.h"
@@ -747,7 +748,7 @@ static const char* buf_for_esc(const char* esc, size_t* cons, size_t* prod) {
 /* Limited by buffer size at 0x3002140 */
 #define SJIS_LEN_UNTIL_NEWLINE_MAX 512
 
-char* mk_strtab_str(const char* u8str, iconv_t conv) {
+static char* mk_strtab_str_inner(const char* u8str, iconv_t conv) {
 #ifdef HAS_ICONV
     assert(conv != (iconv_t)-1);
     assert(!strncmp(u8"¥", (char[]){0xc2, 0xa5}, 2));
@@ -813,4 +814,16 @@ fail:
 #else
     return NULL;
 #endif
+}
+
+/* Troca letras acentuadas por códigos gregos (ver accents.c) antes da conversão para Shift-JIS */
+char* mk_strtab_str(const char* u8str, iconv_t conv) {
+    char* remapped = accent_remap_utf8(u8str);
+    if (!remapped) {
+        perror("malloc");
+        return NULL;
+    }
+    char* ret = mk_strtab_str_inner(remapped, conv);
+    free(remapped);
+    return ret;
 }
